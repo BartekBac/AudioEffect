@@ -55,49 +55,34 @@ iChannel0RightOut = toReturn;
 
 int main() {
 	AudioFile<double> audioFile;
-	audioFile.load("bedi.wav");
+	string filename = "banjo";
+	audioFile.load(filename + ".wav");
 	audioFile.printSummary();
+
+	int sampleRate = audioFile.getSampleRate();
+	int signalLength = audioFile.getNumSamplesPerChannel();
+	double delay = 8.2;
+	double frequency = 0.75;
+	double coupling = 1;
 
 	int channel = 0;
 	int numSamples = audioFile.getNumSamplesPerChannel();
 
-	int size = 12000;
+	int timeDelayMax = floor(0.001 * delay * sampleRate);
+	double frequencyDelayChange = frequency / (double)sampleRate;
+	double a = coupling;
 
-	const double  Tmax = 48000/2;
-	const double Fdelay = 1 / 48000;
-	const double pi = M_PI;
-	double bufor[12000] = { 0 };
+	for (int i = timeDelayMax + 1; i < signalLength; i++) {
 
-	/*for (int i = 0; i < size; i++) {
-		bufor[i] = audioFile.samples[channel][i];
-	}*/
-
-
-	//for (int i = 0 , j = 0; i < numSamples; i++, j++)
-	//{
-	//	/*if (j == size) {
-	//		j = 0;
-	//	}*/
-	//	double currentSample = audioFile.samples[channel][i];
-	//	int index = i - Tmax*((double)1 + sin(2 * pi*i*Fdelay));
-
-
-	//	if (index > 0 && index < numSamples) {
-	//		audioFile.samples[channel][i] = currentSample + audioFile.samples[channel][index];
-	//	}
-	//	//bufor[j] = currentSample;
-	//}
-	//x/abs(x)*(1-e^((x^2)/abs(x))
-	for (int i = 0; i < numSamples; i++) {
-		
 		double currentSample = audioFile.samples[channel][i];
-	
-		double value = currentSample / abs(currentSample)*(1 - exp((currentSample*currentSample) / abs(currentSample)));
-
-		audioFile.samples[channel][i] = value;
+		
+		int delayTime = 1 + round(timeDelayMax / 2.0 * (1.0 - cos(2 * M_PI*frequencyDelayChange*i)));
+		double newSampleValue = (1.0 / (1.0 + a)) * (currentSample + a * audioFile.samples[channel][i - delayTime]);
+		audioFile.samples[channel][i] = newSampleValue;
 	}
 
-	audioFile.save("result.wav");
+
+	audioFile.save(filename+"_result.wav");
 	cout << "done" << endl;
 	getchar();
 
