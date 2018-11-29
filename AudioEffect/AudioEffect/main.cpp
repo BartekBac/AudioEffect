@@ -55,7 +55,7 @@ iChannel0RightOut = toReturn;
 
 int main() {
 	AudioFile<double> audioFile;
-	string filename = "banjo";
+	string filename = "bedi";
 	audioFile.load(filename + ".wav");
 	audioFile.printSummary();
 
